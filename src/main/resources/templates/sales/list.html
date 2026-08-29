@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Sales History')}"></head>
+<body>
+
+<div th:replace="~{layout :: navbar('sales')}"></div>
+
+<div class="main-content">
+    
+    <div th:replace="~{layout :: alerts}"></div>
+
+    <div class="card card-custom p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <div>
+                <h4 class="fw-bold mb-1">Sales Records & Invoices</h4>
+                <p class="text-muted small mb-0">View transactions, total revenue, and generated customer invoices</p>
+            </div>
+            <a th:href="@{/sales/new}" class="btn btn-success fw-semibold">
+                <i class="bi bi-cart-plus me-1"></i> New Medicine Sale
+            </a>
+        </div>
+
+        <!-- Sales Table -->
+        <div class="table-responsive">
+            <table class="table table-hover table-custom align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Customer</th>
+                        <th>Date & Time</th>
+                        <th>Total Items</th>
+                        <th>Total Amount</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="s : ${sales}">
+                        <td class="fw-bold text-dark" th:text="'#INV-' + ${s.id}">#INV-1</td>
+                        <td>
+                            <span class="fw-semibold text-dark" th:text="${s.customer != null ? s.customer.name : 'Walk-in Customer'}">John Doe</span>
+                            <small class="d-block text-muted" th:if="${s.customer != null}" th:text="${s.customer.phone}">Phone</small>
+                        </td>
+                        <td th:text="${#temporals.format(s.saleDate, 'yyyy-MM-dd HH:mm:ss')}">2026-08-04 14:00</td>
+                        <td>
+                            <span class="badge bg-light text-dark border" th:text="${#lists.size(s.items)} + ' item(s)'">1 item(s)</span>
+                        </td>
+                        <td class="fw-bold text-success fs-6" th:text="'$' + ${#numbers.formatDecimal(s.totalAmount, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                        <td class="text-end">
+                            <a th:href="@{/sales/view/{id}(id=${s.id})}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-receipt me-1"></i> View Invoice
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(sales)}">
+                        <td colspan="6" class="text-center text-muted py-4">No sales records available.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{layout :: scripts}"></div>
+</body>
+</html>

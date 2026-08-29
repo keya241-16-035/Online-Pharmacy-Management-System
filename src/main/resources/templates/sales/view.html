@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Invoice #' + ${sale.id})}"></head>
+<body>
+
+<div class="d-print-none">
+    <div th:replace="~{layout :: navbar('sales')}"></div>
+</div>
+
+<div class="main-content">
+    
+    <!-- Print / Action Controls -->
+    <div class="d-flex justify-content-between align-items-center mb-4 d-print-none">
+        <a th:href="@{/sales}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i> Back to Sales</a>
+        <button onclick="window.print()" class="btn btn-primary fw-semibold"><i class="bi bi-printer me-1"></i> Print Invoice</button>
+    </div>
+
+    <!-- Printable Invoice Card -->
+    <div class="card card-custom p-5 bg-white shadow-sm" id="invoiceCard">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-start border-bottom pb-4 mb-4">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-capsule-pill fs-2 text-primary"></i>
+                    <h3 class="fw-bold mb-0 text-dark">PharmaCare Pharmacy</h3>
+                </div>
+                <p class="text-muted small mb-0">123 Healthcare Boulevard, Suite 400</p>
+                <p class="text-muted small mb-0">Phone: +1 (800) 555-PHARMA | Email: billing@pharmacare.com</p>
+            </div>
+            <div class="text-end">
+                <h4 class="fw-bold text-primary mb-1">INVOICE</h4>
+                <p class="fw-bold text-dark mb-1" th:text="'#INV-' + ${sale.id}">#INV-1001</p>
+                <p class="text-muted small mb-0" th:text="'Date: ' + ${#temporals.format(sale.saleDate, 'yyyy-MM-dd HH:mm')}">Date: 2026-08-04</p>
+            </div>
+        </div>
+
+        <!-- Customer & Pharmacy Info Grid -->
+        <div class="row mb-4">
+            <div class="col-6">
+                <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Billed To:</span>
+                <h6 class="fw-bold text-dark mb-1" th:text="${sale.customer != null ? sale.customer.name : 'Walk-in Customer'}">Walk-in Customer</h6>
+                <p class="text-muted small mb-0" th:if="${sale.customer != null and sale.customer.phone != null}" th:text="'Phone: ' + ${sale.customer.phone}">Phone</p>
+                <p class="text-muted small mb-0" th:if="${sale.customer != null and sale.customer.address != null}" th:text="${sale.customer.address}">Address</p>
+            </div>
+            <div class="col-6 text-end">
+                <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Payment Method:</span>
+                <span class="badge bg-success-subtle text-success fw-semibold px-3 py-2">Paid / Counter Cash</span>
+            </div>
+        </div>
+
+        <!-- Line Items Table -->
+        <div class="table-responsive mb-4">
+            <table class="table table-bordered align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 5%;">#</th>
+                        <th style="width: 45%;">Medicine Description</th>
+                        <th style="width: 15%;" class="text-center">Quantity</th>
+                        <th style="width: 15%;" class="text-end">Unit Price</th>
+                        <th style="width: 20%;" class="text-end">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="item, iterStat : ${sale.items}">
+                        <td class="text-muted" th:text="${iterStat.count}">1</td>
+                        <td>
+                            <strong class="text-dark" th:text="${item.medicine.name}">Paracetamol 500mg</strong>
+                            <small class="d-block text-muted" th:if="${item.medicine.category != null}" th:text="'Category: ' + ${item.medicine.category.name}">Category</small>
+                        </td>
+                        <td class="text-center fw-semibold" th:text="${item.quantity}">2</td>
+                        <td class="text-end" th:text="'$' + ${#numbers.formatDecimal(item.unitPrice, 1, 'COMMA', 2, 'POINT')}">$5.50</td>
+                        <td class="text-end fw-bold text-dark" th:text="'$' + ${#numbers.formatDecimal(item.subtotal, 1, 'COMMA', 2, 'POINT')}">$11.00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Totals Summary -->
+        <div class="row justify-content-end">
+            <div class="col-md-5">
+                <table class="table table-borderless">
+                    <tr>
+                        <td class="text-end text-muted fw-semibold">Subtotal:</td>
+                        <td class="text-end fw-bold text-dark" th:text="'$' + ${#numbers.formatDecimal(sale.totalAmount, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                    </tr>
+                    <tr>
+                        <td class="text-end text-muted fw-semibold">Tax (0%):</td>
+                        <td class="text-end fw-bold text-dark">$0.00</td>
+                    </tr>
+                    <tr class="border-top border-2">
+                        <td class="text-end fw-bold fs-5 text-dark">Total Amount:</td>
+                        <td class="text-end fw-bold fs-4 text-success" th:text="'$' + ${#numbers.formatDecimal(sale.totalAmount, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Receipt Footer Note -->
+        <div class="border-top pt-4 text-center text-muted small mt-4">
+            <p class="mb-1 fw-medium">Thank you for choosing PharmaCare Pharmacy!</p>
+            <p class="mb-0">Please keep this invoice for your medical records and prescription reference.</p>
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    .sidebar, .top-navbar, .d-print-none {
+        display: none !important;
+    }
+    .main-content {
+        margin-left: 0 !important;
+        padding: 0 !important;
+    }
+    #invoiceCard {
+        box-shadow: none !important;
+        border: none !important;
+    }
+}
+</style>
+
+<div th:replace="~{layout :: scripts}"></div>
+</body>
+</html>
